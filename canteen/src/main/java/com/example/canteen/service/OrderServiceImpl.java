@@ -3,29 +3,41 @@ package com.example.canteen.service;
 import com.example.canteen.model.OrderEntity;
 import com.example.canteen.model.OrderProductEntity;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-import software.amazon.awssdk.services.dynamodb.model.*;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
+import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.GetItemResponse;
+import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.ScanRequest;
+import software.amazon.awssdk.services.dynamodb.model.ScanResponse;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class OrderServiceImpl {
 
+    /**
+     * This method is used to add new order detail to the database.
+     *
+     * @return String indicating the status of the operation.
+     */
     public static String addNewOrderDetail(final DynamoDbClient dynamoDbClient, final OrderEntity orderEntity) {
 
-        Map<String, AttributeValue> key = new HashMap<>();
+        final Map<String, AttributeValue> key = new HashMap<>();
         key.put("orderId", AttributeValue.builder().n(String.valueOf(orderEntity.getOrderId())).build());
 
-        GetItemRequest getRequest = GetItemRequest.builder()
+        final GetItemRequest getRequest = GetItemRequest.builder()
                 .tableName("OrderTable")
                 .key(key)
                 .build();
 
         try {
-            GetItemResponse getItemResponse = dynamoDbClient.getItem(getRequest);
-            Map<String, AttributeValue> existingItem = getItemResponse.item();
+            final GetItemResponse getItemResponse = dynamoDbClient.getItem(getRequest);
+            final Map<String, AttributeValue> existingItem = getItemResponse.item();
 
             if (existingItem != null && !existingItem.isEmpty()) {
                 return "Order ID '" + orderEntity.getOrderId() + "' already exists";
@@ -36,14 +48,14 @@ public class OrderServiceImpl {
                 }
                 orderEntity.setTotalPrice(totalPrice);
 
-                Map<String, AttributeValue> item = new HashMap<>();
+                final Map<String, AttributeValue> item = new HashMap<>();
                 item.put("orderId", AttributeValue.builder().n(String.valueOf(orderEntity.getOrderId())).build());
                 item.put("userEmailId", AttributeValue.builder().s(orderEntity.getUserEmailId()).build());
                 item.put("paymentId", AttributeValue.builder().s(orderEntity.getPaymentId()).build());
                 item.put("totalPrice", AttributeValue.builder().n(String.valueOf(orderEntity.getTotalPrice())).build());
 
                 // Construct list of order product entities
-                List<AttributeValue> orderProductEntities = new ArrayList<>();
+                final List<AttributeValue> orderProductEntities = new ArrayList<>();
                 for (OrderProductEntity orderProductEntity : orderEntity.getOrderProductEntityList()) {
                     Map<String, AttributeValue> productItem = new HashMap<>();
                     productItem.put("productId", AttributeValue.builder().s(orderProductEntity.getProductId()).build());
@@ -54,7 +66,7 @@ public class OrderServiceImpl {
                 }
                 item.put("orderProductEntityList", AttributeValue.builder().l(orderProductEntities).build());
 
-                PutItemRequest request = PutItemRequest.builder()
+                final PutItemRequest request = PutItemRequest.builder()
                         .tableName("OrderTable")
                         .item(item)
                         .build();
@@ -68,7 +80,9 @@ public class OrderServiceImpl {
     }
 
     /**
-     * getting all order details
+     * This method is used to get all order details from the database.
+     *
+     * @return List of OrderEntity objects containing the order details.
      */
     public static List<OrderEntity> getAllOrderDetails(final DynamoDbClient dynamoDbClient) {
         final ScanRequest scanRequest = ScanRequest.builder()
@@ -86,10 +100,10 @@ public class OrderServiceImpl {
                         Integer.parseInt(item.get("totalPrice").n()),
                         item.get("paymentId").s()
                 );
-                List<OrderProductEntity> orderProductEntityList = new ArrayList<>();
+                final List<OrderProductEntity> orderProductEntityList = new ArrayList<>();
                 for (AttributeValue productAttributeValue : item.get("orderProductEntityList").l()) {
-                    Map<String, AttributeValue> productItem = productAttributeValue.m();
-                    OrderProductEntity orderProductEntity = new OrderProductEntity(
+                    final Map<String, AttributeValue> productItem = productAttributeValue.m();
+                    final OrderProductEntity orderProductEntity = new OrderProductEntity(
                             productItem.get("productId").s(),
                             productItem.get("productName").s(),
                             Integer.parseInt(productItem.get("productCount").n()),
@@ -100,6 +114,8 @@ public class OrderServiceImpl {
                 orderEntity.setOrderProductEntityList(orderProductEntityList);
                 orderEntityList.add(orderEntity);
             }
+
+            Collections.sort(orderEntityList, Comparator.comparing(OrderEntity::getOrderId, Comparator.reverseOrder()));
             return orderEntityList;
         } catch (Exception e) {
             System.out.println("Error in retrieving order details: " + e.getMessage());
@@ -109,7 +125,9 @@ public class OrderServiceImpl {
 
 
     /**
-     * Getting order details for a single user
+     * This method is used to get order details for a particular user.
+     *
+     * @return List of OrderEntity objects containing the order details for the user.
      */
     public static List<OrderEntity> getOrderDetailsForUser(final DynamoDbClient dynamoDbClient, final String userEmailId) {
         final Map<String, AttributeValue> attributeValues = Collections.singletonMap(":val", AttributeValue.builder().s(userEmailId).build());
@@ -125,16 +143,16 @@ public class OrderServiceImpl {
             final List<OrderEntity> orderEntityList = new ArrayList<>();
 
             for (Map<String, AttributeValue> item : scanResponse.items()) {
-                OrderEntity orderEntity = new OrderEntity(
+                final OrderEntity orderEntity = new OrderEntity(
                         Integer.parseInt(item.get("orderId").n()),
                         item.get("userEmailId").s(),
                         Integer.parseInt(item.get("totalPrice").n()),
                         item.get("paymentId").s()
                 );
-                List<OrderProductEntity> orderProductEntityList = new ArrayList<>();
+                final List<OrderProductEntity> orderProductEntityList = new ArrayList<>();
                 for (AttributeValue productAttributeValue : item.get("orderProductEntityList").l()) {
-                    Map<String, AttributeValue> productItem = productAttributeValue.m();
-                    OrderProductEntity orderProductEntity = new OrderProductEntity(
+                    final Map<String, AttributeValue> productItem = productAttributeValue.m();
+                    final OrderProductEntity orderProductEntity = new OrderProductEntity(
                             productItem.get("productId").s(),
                             productItem.get("productName").s(),
                             Integer.parseInt(productItem.get("productCount").n()),
@@ -145,6 +163,7 @@ public class OrderServiceImpl {
                 orderEntity.setOrderProductEntityList(orderProductEntityList);
                 orderEntityList.add(orderEntity);
             }
+            Collections.sort(orderEntityList, Comparator.comparing(OrderEntity::getOrderId, Comparator.reverseOrder()));
             return orderEntityList;
         } catch (Exception e) {
             System.out.println("Error in retrieving order details: " + e.getMessage());

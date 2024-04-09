@@ -12,37 +12,45 @@ import java.util.List;
 
 public interface FoodInterface {
     /**
-     * Add new food.
+     * This method is used to add new food item
      */
     @PostMapping("/add/food")
     public String addNewFood(@RequestBody final FoodEntity foodEntity);
 
     /**
-     * get all food items
+     * This method is used to retrieve all food items from the food table.
      */
     @GetMapping("/get/foods")
     public List<FoodEntity> getAllFoodItems();
 
     /**
-     *  Edit food detail
+     * This method is used to edit the details of a particular food item.
+     *
+     * @return String to mention the success or failure of the operation.
      */
     @PutMapping("/food/{productId}")
     public String editFoodDetail(@PathVariable final String productId, @RequestBody final FoodEntity foodEntity);
 
     /**
-     * Get food details of a single food
+     * This method is used to retrieve the details of a particular food item.
+     *
+     * @return FoodEntity object containing the details of the food item.
      */
     @GetMapping("/get/food/{productId}")
     public FoodEntity getDetailOfSingleFood(@PathVariable final String productId);
 
     /**
-     * Get food details of particular type
+     * This method is used to retrieve the food items of a particular type.
+     *
+     * @return List of food items of a particular type.
      */
     @GetMapping("/food/{foodType}")
     public List<FoodEntity> getFoodDetailsOfType(@PathVariable final String foodType);
 
     /**
-     *  Deleting a particular food item
+     * This method is used to delete a particular food item.
+     *
+     * @return String to mention the success or failure of the operation.
      */
     @DeleteMapping("/delete/{productId}")
     public String deleteFoodItem(@PathVariable final String productId);

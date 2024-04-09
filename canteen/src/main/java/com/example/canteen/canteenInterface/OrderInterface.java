@@ -9,20 +9,27 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.List;
 
 public interface OrderInterface {
+
     /**
-     * Add new order detail
+     * This method is used to add new order detail to the database.
+     *
+     * @return String indicating the status of the operation.
      */
     @PostMapping("/order")
     public String addNewOrderDetail(@RequestBody OrderEntity orderEntity);
 
     /**
-     * get all order details
+     * This method is used to get all order details from the database.
+     *
+     * @return List of OrderEntity objects containing the order details.
      */
     @GetMapping("/get/orders")
     public List<OrderEntity> getAllOrderDetails();
 
     /**
-     * get all order details of a particular user
+     * This method is used to get order details for a particular user.
+     *
+     * @return List of OrderEntity objects containing the order details for the user.
      */
     @GetMapping("/order/{userEmailId}")
     public List<OrderEntity> getOrderDetailsForUser(@PathVariable String userEmailId);

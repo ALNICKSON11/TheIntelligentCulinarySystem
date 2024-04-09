@@ -23,16 +23,31 @@ public class OrderController implements OrderInterface {
     @Inject
     private final DynamoDbClient dynamoDbClient = request.getDdbClient();
 
+    /**
+     * This method is used to add new order detail to the database.
+     *
+     * @return String indicating the status of the operation.
+     */
     @Override
     public String addNewOrderDetail(@RequestBody final OrderEntity orderEntity) {
         return OrderServiceImpl.addNewOrderDetail(dynamoDbClient, orderEntity);
     }
 
+    /**
+     * This method is used to get all order details from the database.
+     *
+     * @return List of OrderEntity objects containing the order details.
+     */
     @Override
-    public List<OrderEntity> getAllOrderDetails(){
+    public List<OrderEntity> getAllOrderDetails() {
         return OrderServiceImpl.getAllOrderDetails(dynamoDbClient);
     }
 
+    /**
+     * This method is used to get order details for a particular user.
+     *
+     * @return List of OrderEntity objects containing the order details for the user.
+     */
     @Override
     public List<OrderEntity> getOrderDetailsForUser(@PathVariable String userEmailId) {
         return OrderServiceImpl.getOrderDetailsForUser(dynamoDbClient, userEmailId);

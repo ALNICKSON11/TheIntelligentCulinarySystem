@@ -2,6 +2,7 @@ package com.example.canteen.canteenInterface;
 
 import com.example.canteen.model.UserEntity;
 import com.example.canteen.model.UserLoginEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public interface UserInterface {
     /**
      * This method is used to get all the user details from database.

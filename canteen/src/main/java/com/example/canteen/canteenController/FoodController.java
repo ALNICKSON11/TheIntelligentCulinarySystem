@@ -8,12 +8,14 @@ import com.example.canteen.service.FoodServiceImpl;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 import java.util.List;
 
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 public class FoodController implements FoodInterface {
     private final Injector injector = Guice.createInjector(new CanteenModule());

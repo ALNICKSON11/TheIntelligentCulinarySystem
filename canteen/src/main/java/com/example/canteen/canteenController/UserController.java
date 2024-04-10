@@ -9,6 +9,7 @@ import com.example.canteen.service.UserServiceImpl;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,6 +17,7 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 import java.util.List;
 
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 public class UserController implements UserInterface {
     private final Injector injector = Guice.createInjector(new CanteenModule());

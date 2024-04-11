@@ -17,7 +17,7 @@ public class FoodTable {
         List<AttributeDefinition> attributeDefinitions = List.of(
                 AttributeDefinition.builder()
                         .attributeName("productId")
-                        .attributeType(ScalarAttributeType.S)
+                        .attributeType(ScalarAttributeType.N)
                         .build());
 
         List<KeySchemaElement> keySchema = Collections.singletonList(

@@ -1,6 +1,7 @@
 package com.example.canteen.service;
 
 import com.example.canteen.model.FoodEntity;
+import com.example.canteen.utils.ProductIdCounter;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.DeleteItemRequest;
@@ -24,48 +25,34 @@ public class FoodServiceImpl {
      * This method is used to add new food item
      */
     public static String addNewFood(final DynamoDbClient dynamoDbClient, final FoodEntity foodEntity) {
-        final Map<String, AttributeValue> key = new HashMap<>();
-        key.put("productId", AttributeValue.builder().s(foodEntity.getProductId()).build());
 
-        final GetItemRequest getRequest = GetItemRequest.builder()
+        ProductIdCounter productIdCounter = new ProductIdCounter();
+        int nextProductId = productIdCounter.getNextProductId(dynamoDbClient);
+        foodEntity.setProductId(nextProductId);
+
+        final Map<String, AttributeValue> item = new HashMap<>();
+        item.put("productId", AttributeValue.builder().n(String.valueOf(foodEntity.getProductId())).build());
+        item.put("productName", AttributeValue.builder().s(foodEntity.getProductName()).build());
+        item.put("thumbnailImage", AttributeValue.builder().s(foodEntity.getThumbnailImage()).build());
+        item.put("productPrice", AttributeValue.builder().n(String.valueOf(foodEntity.getProductPrice())).build());
+        item.put("foodType", AttributeValue.builder().s(foodEntity.getFoodType()).build());
+        if (foodEntity.getFirstImageLink() != null && !foodEntity.getFirstImageLink().isEmpty()) {
+            item.put("firstImageLink", AttributeValue.builder().s(foodEntity.getFirstImageLink()).build());
+        }
+        if (foodEntity.getSecondImageLink() != null && !foodEntity.getSecondImageLink().isEmpty()) {
+            item.put("secondImageLink", AttributeValue.builder().s(foodEntity.getSecondImageLink()).build());
+        }
+        if (foodEntity.getThirdImageLink() != null && !foodEntity.getThirdImageLink().isEmpty()) {
+            item.put("thirdImageLink", AttributeValue.builder().s(foodEntity.getThirdImageLink()).build());
+        }
+
+        final PutItemRequest request = PutItemRequest.builder()
                 .tableName("FoodTable")
-                .key(key)
+                .item(item)
                 .build();
 
-        try {
-            final GetItemResponse getItemResponse = dynamoDbClient.getItem(getRequest);
-            final Map<String, AttributeValue> existingItem = getItemResponse.item();
-
-            if (existingItem != null && !existingItem.isEmpty()) {
-                return "Product ID '" + foodEntity.getProductId() + "' already used for " + foodEntity.getProductName();
-            } else {
-                final Map<String, AttributeValue> item = new HashMap<>();
-                item.put("productId", AttributeValue.builder().s(foodEntity.getProductId()).build());
-                item.put("productName", AttributeValue.builder().s(foodEntity.getProductName()).build());
-                item.put("thumbnailImage", AttributeValue.builder().s(foodEntity.getThumbnailImage()).build());
-                item.put("productPrice", AttributeValue.builder().n(String.valueOf(foodEntity.getProductPrice())).build());
-                item.put("foodType", AttributeValue.builder().s(foodEntity.getFoodType()).build());
-                if (foodEntity.getFirstImageLink() != null && !foodEntity.getFirstImageLink().isEmpty()) {
-                    item.put("firstImageLink", AttributeValue.builder().s(foodEntity.getFirstImageLink()).build());
-                }
-                if (foodEntity.getSecondImageLink() != null && !foodEntity.getSecondImageLink().isEmpty()) {
-                    item.put("secondImageLink", AttributeValue.builder().s(foodEntity.getSecondImageLink()).build());
-                }
-                if (foodEntity.getThirdImageLink() != null && !foodEntity.getThirdImageLink().isEmpty()) {
-                    item.put("thirdImageLink", AttributeValue.builder().s(foodEntity.getThirdImageLink()).build());
-                }
-
-                final PutItemRequest request = PutItemRequest.builder()
-                        .tableName("FoodTable")
-                        .item(item)
-                        .build();
-
-                dynamoDbClient.putItem(request);
-                return foodEntity.getProductName() + " added successfully";
-            }
-        } catch (DynamoDbException e) {
-            return "Error in adding food item: " + e.getMessage();
-        }
+        dynamoDbClient.putItem(request);
+        return foodEntity.getProductName() + " added successfully";
     }
 
     /**
@@ -82,7 +69,7 @@ public class FoodServiceImpl {
 
             for (Map<String, AttributeValue> item : scanResponse.items()) {
                 final FoodEntity foodEntity = new FoodEntity(
-                        item.get("productId").s(),
+                        Integer.parseInt(item.get("productId").n()),
                         item.get("productName").s(),
                         item.get("thumbnailImage").s(),
                         Integer.parseInt(item.get("productPrice").n()),
@@ -102,7 +89,7 @@ public class FoodServiceImpl {
                 }
                 foodEntityList.add(foodEntity);
             }
-            Collections.sort(foodEntityList, Comparator.comparingInt(foodEntity -> Integer.parseInt(foodEntity.getProductId())));
+            Collections.sort(foodEntityList, Comparator.comparing(FoodEntity::getProductId));
 
             return foodEntityList;
         } catch (Exception e) {
@@ -116,7 +103,7 @@ public class FoodServiceImpl {
      *
      * @return String to mention the success or failure of the operation.
      */
-    public static String editFoodDetail(final DynamoDbClient dynamoDbClient, final String productId, final FoodEntity foodEntity) {
+    public static String editFoodDetail(final DynamoDbClient dynamoDbClient, final Integer productId, final FoodEntity foodEntity) {
         final Map<String, AttributeValue> updateExpressionValues = new HashMap<>();
         final StringBuilder updateExpressionBuilder = new StringBuilder();
 
@@ -154,7 +141,7 @@ public class FoodServiceImpl {
 
         final UpdateItemRequest updateItemRequest = UpdateItemRequest.builder()
                 .tableName("FoodTable")
-                .key(Collections.singletonMap("productId", AttributeValue.builder().s(productId).build()))
+                .key(Collections.singletonMap("productId", AttributeValue.builder().n(String.valueOf(productId)).build()))
                 .updateExpression("SET " + updateExpression)
                 .conditionExpression("attribute_exists(productId)")
                 .expressionAttributeValues(updateExpressionValues)
@@ -186,7 +173,7 @@ public class FoodServiceImpl {
                 final String itemFoodType = item.get("foodType").s();
                 if (foodType.equalsIgnoreCase(itemFoodType)) {
                     final FoodEntity foodEntity = new FoodEntity(
-                            item.get("productId").s(),
+                            Integer.parseInt(item.get("productId").n()),
                             item.get("productName").s(),
                             item.get("thumbnailImage").s(),
                             Integer.parseInt(item.get("productPrice").n()),
@@ -207,7 +194,7 @@ public class FoodServiceImpl {
                     foodEntityList.add(foodEntity);
                 }
             }
-            Collections.sort(foodEntityList, Comparator.comparingInt(foodEntity -> Integer.parseInt(foodEntity.getProductId())));
+            Collections.sort(foodEntityList, Comparator.comparing(FoodEntity::getProductId));
             return foodEntityList;
         } catch (Exception e) {
             System.out.println("Error in retrieving food details: " + e.getMessage());
@@ -220,10 +207,10 @@ public class FoodServiceImpl {
      *
      * @return String to mention the success or failure of the operation.
      */
-    public static FoodEntity getDetailOfSingleFood(final DynamoDbClient dynamoDbClient, final String productId) {
+    public static FoodEntity getDetailOfSingleFood(final DynamoDbClient dynamoDbClient, final Integer productId) {
         final GetItemRequest getItemRequest = GetItemRequest.builder()
                 .tableName("FoodTable")
-                .key(Collections.singletonMap("productId", AttributeValue.builder().s(productId).build()))
+                .key(Collections.singletonMap("productId", AttributeValue.builder().n(String.valueOf(productId)).build()))
                 .build();
         try {
             final GetItemResponse getItemResponse = dynamoDbClient.getItem(getItemRequest);
@@ -235,7 +222,7 @@ public class FoodServiceImpl {
                 final String thirdImageLink = item.containsKey("thirdImageLink") ? item.get("thirdImageLink").s() : null;
 
                 return new FoodEntity(
-                        item.get("productId").s(),
+                        Integer.parseInt(item.get("productId").n()),
                         item.get("productName").s(),
                         item.get("thumbnailImage").s(),
                         Integer.parseInt(item.get("productPrice").n()),
@@ -258,14 +245,14 @@ public class FoodServiceImpl {
      *
      * @return FoodEntity object containing the details of the food item.
      */
-    public static String deleteFoodItem(final DynamoDbClient dynamoDbClient, final String productId) {
+    public static String deleteFoodItem(final DynamoDbClient dynamoDbClient, final Integer productId) {
         final DeleteItemRequest deleteItemRequest = DeleteItemRequest.builder()
                 .tableName("FoodTable")
-                .key(Collections.singletonMap("productId", AttributeValue.builder().s(productId).build()))
+                .key(Collections.singletonMap("productId", AttributeValue.builder().n(String.valueOf(productId)).build()))
                 .build();
         final GetItemRequest getItemRequest = GetItemRequest.builder()
                 .tableName("FoodTable")
-                .key(Collections.singletonMap("productId", AttributeValue.builder().s(productId).build()))
+                .key(Collections.singletonMap("productId", AttributeValue.builder().n(String.valueOf(productId)).build()))
                 .build();
 
         try {

@@ -31,7 +31,7 @@ public interface FoodInterface {
      * @return String to mention the success or failure of the operation.
      */
     @PutMapping("/food/{productId}")
-    public String editFoodDetail(@PathVariable final String productId, @RequestBody final FoodEntity foodEntity);
+    public String editFoodDetail(@PathVariable final Integer productId, @RequestBody final FoodEntity foodEntity);
 
     /**
      * This method is used to retrieve the details of a particular food item.
@@ -39,7 +39,7 @@ public interface FoodInterface {
      * @return FoodEntity object containing the details of the food item.
      */
     @GetMapping("/get/food/{productId}")
-    public FoodEntity getDetailOfSingleFood(@PathVariable final String productId);
+    public FoodEntity getDetailOfSingleFood(@PathVariable final Integer productId);
 
     /**
      * This method is used to retrieve the food items of a particular type.
@@ -55,5 +55,5 @@ public interface FoodInterface {
      * @return String to mention the success or failure of the operation.
      */
     @DeleteMapping("/delete/{productId}")
-    public String deleteFoodItem(@PathVariable final String productId);
+    public String deleteFoodItem(@PathVariable final Integer productId);
 }

@@ -18,7 +18,7 @@ public class FoodEntity {
     /**
      * An unique id for all the products
      */
-    private String productId;
+    private Integer productId;
 
     /**
      * Name of the product
@@ -58,7 +58,7 @@ public class FoodEntity {
     /**
      * Constructor for the FoodEntity class without image links.
      */
-    public FoodEntity(String productId, String productName, String thumbnailImage, int productPrice, String foodType) {
+    public FoodEntity(Integer productId, String productName, String thumbnailImage, Integer productPrice, String foodType) {
         this.productId = productId;
         this.productName = productName;
         this.thumbnailImage = thumbnailImage;

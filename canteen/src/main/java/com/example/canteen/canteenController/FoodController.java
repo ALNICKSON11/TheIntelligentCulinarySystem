@@ -45,7 +45,7 @@ public class FoodController implements FoodInterface {
      * @return String to mention the success or failure of the operation.
      */
     @Override
-    public String editFoodDetail(final String productId, final FoodEntity foodEntity) {
+    public String editFoodDetail(final Integer productId, final FoodEntity foodEntity) {
         return FoodServiceImpl.editFoodDetail(dynamoDbClient, productId, foodEntity);
     }
 
@@ -65,7 +65,7 @@ public class FoodController implements FoodInterface {
      * @return String to mention the success or failure of the operation.
      */
     @Override
-    public String deleteFoodItem(String productId) {
+    public String deleteFoodItem(Integer productId) {
         return FoodServiceImpl.deleteFoodItem(dynamoDbClient, productId);
     }
 
@@ -75,7 +75,7 @@ public class FoodController implements FoodInterface {
      * @return FoodEntity object containing the details of the food item.
      */
     @Override
-    public FoodEntity getDetailOfSingleFood(final String productId){
+    public FoodEntity getDetailOfSingleFood(final Integer productId){
         return FoodServiceImpl.getDetailOfSingleFood(dynamoDbClient, productId);
     }
 }

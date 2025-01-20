@@ -6,10 +6,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
+@RequestMapping("/order")
 public interface OrderInterface {
 
     /**
@@ -17,7 +19,7 @@ public interface OrderInterface {
      *
      * @return String indicating the status of the operation.
      */
-    @PostMapping("/order")
+    @PostMapping("/add")
     public String addNewOrderDetail(@RequestBody OrderEntity orderEntity);
 
     /**
@@ -25,7 +27,7 @@ public interface OrderInterface {
      *
      * @return List of OrderEntity objects containing the order details.
      */
-    @GetMapping("/get/orders")
+    @GetMapping("/")
     public List<OrderEntity> getAllOrderDetails();
 
     /**
@@ -33,6 +35,6 @@ public interface OrderInterface {
      *
      * @return List of OrderEntity objects containing the order details for the user.
      */
-    @GetMapping("/order/{userEmailId}")
+    @GetMapping("/{userEmailId}")
     public List<OrderEntity> getOrderDetailsForUser(@PathVariable String userEmailId);
 }

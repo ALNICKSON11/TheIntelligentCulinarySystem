@@ -7,17 +7,19 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
+@RequestMapping("/user")
 public interface UserInterface {
     /**
      * This method is used to get all the user details from database.
      *
      * @return List of UserEntity.
      */
-    @GetMapping("/get")
+    @GetMapping("/")
     public List<UserEntity> getAllUsersDetail();
 
     /**
@@ -33,7 +35,7 @@ public interface UserInterface {
      *
      * @return UserEntity object containing the user details.
      */
-    @GetMapping("/user/{userEmailId}")
+    @GetMapping("/{userEmailId}")
     public UserEntity getSingleUserDetail(@PathVariable final String userEmailId);
 
     /**

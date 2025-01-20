@@ -8,21 +8,23 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
+@RequestMapping("/food")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 public interface FoodInterface {
     /**
      * This method is used to add new food item
      */
-    @PostMapping("/add/food")
+    @PostMapping("/add")
     public String addNewFood(@RequestBody final FoodEntity foodEntity);
 
     /**
      * This method is used to retrieve all food items from the food table.
      */
-    @GetMapping("/get/foods")
+    @GetMapping("/")
     public List<FoodEntity> getAllFoodItems();
 
     /**
@@ -30,7 +32,7 @@ public interface FoodInterface {
      *
      * @return String to mention the success or failure of the operation.
      */
-    @PutMapping("/food/{productId}")
+    @PutMapping("/edit/{productId}")
     public String editFoodDetail(@PathVariable final Integer productId, @RequestBody final FoodEntity foodEntity);
 
     /**
@@ -38,7 +40,7 @@ public interface FoodInterface {
      *
      * @return FoodEntity object containing the details of the food item.
      */
-    @GetMapping("/get/food/{productId}")
+    @GetMapping("/{productId}")
     public FoodEntity getDetailOfSingleFood(@PathVariable final Integer productId);
 
     /**
@@ -46,7 +48,7 @@ public interface FoodInterface {
      *
      * @return List of food items of a particular type.
      */
-    @GetMapping("/food/{foodType}")
+    @GetMapping("/type/{foodType}")
     public List<FoodEntity> getFoodDetailsOfType(@PathVariable final String foodType);
 
     /**
